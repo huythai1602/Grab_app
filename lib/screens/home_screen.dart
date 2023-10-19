@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_application_1/screens/account_screen.dart';
@@ -322,14 +323,30 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(
           height: 20,
         ),
-        CarouselSlider.builder(
-          itemCount: urlImages.length,
-          itemBuilder: (context, index, realIndex) {
-            final urlImage = urlImages[index];
+        FutureBuilder<QuerySnapshot>(
+          future: FirebaseFirestore.instance.collection('recommend').get(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator(
+                color: Colors.red,
+              );
+            } else {
+              var data = snapshot.data?.docs.length;
+              if (snapshot.hasData) {
+                return CarouselSlider.builder(
+                  itemCount: urlImages.length,
+                  itemBuilder: (context, index, realIndex) {
+                    final urlImage = urlImages[index];
 
-            return buildImage(urlImage, index);
+                    return buildImage(urlImage, index);
+                  },
+                  options: CarouselOptions(height: 200, autoPlay: true),
+                );
+              }
+            }
+            return Container();
           },
-          options: CarouselOptions(height: 200, autoPlay: true),
         ),
         const SizedBox(
           height: 30,
